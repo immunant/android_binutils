@@ -2276,7 +2276,7 @@ Sized_dwarf_line_info<size, big_endian>::read_lines(
 				 "logical %u file %d line %d context %u",
 				 lsm.shndx, static_cast<int>(lsm.address),
 				 lsm.line_num, logical.file_num,
-				 logical.line_num, lsm.context);
+				 logical.line_num, logical.context);
 		      entry.offset = static_cast<off_t>(lsm.address);
 		      entry.header_num = this->current_header_index_;
 		      entry.file_num =
