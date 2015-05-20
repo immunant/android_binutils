@@ -530,6 +530,18 @@ static const struct ld_option ld_options[] =
   { {"orphan-handling", required_argument, NULL, OPTION_ORPHAN_HANDLING},
     '\0', N_("=MODE"), N_("Control how orphan sections are handled."),
     TWO_DASHES },
+  { {"warn-poison-system-directories", no_argument, NULL,
+     OPTION_WARN_POISON_SYSTEM_DIRECTORIES},
+    '\0', NULL, N_("Warn for -L options using system directories"),
+    TWO_DASHES },
+  { {"no-warn-poison-system-directories", no_argument, NULL,
+     OPTION_NO_WARN_POISON_SYSTEM_DIRECTORIES},
+    '\0', NULL, N_("Do not warn for -L options using system directories"),
+    TWO_DASHES },
+  { {"error-poison-system-directories", no_argument, NULL,
+     OPTION_ERROR_POISON_SYSTEM_DIRECTORIES},
+    '\0', NULL, N_("Give an error for -L options using system directories"),
+    TWO_DASHES },
 };
 
 #define OPTION_COUNT ARRAY_SIZE (ld_options)
@@ -1549,6 +1561,18 @@ parse_args (unsigned argc, char **argv)
 	  else
 	    einfo (_("%P%F: invalid argument to option"
 		     " \"--orphan-handling\"\n"));
+	  break;
+
+	case OPTION_WARN_POISON_SYSTEM_DIRECTORIES:
+	  command_line.warn_poison_system_directories = TRUE;
+	  break;
+
+	case OPTION_NO_WARN_POISON_SYSTEM_DIRECTORIES:
+	  command_line.warn_poison_system_directories = FALSE;
+	  break;
+
+	case OPTION_ERROR_POISON_SYSTEM_DIRECTORIES:
+	  command_line.error_poison_system_directories = TRUE;
 	  break;
 	}
     }
