@@ -101,7 +101,7 @@ int flag_use_elf_stt_common = DEFAULT_GENERATE_ELF_STT_COMMON;
 #endif
 
 /* Enable incbin directive. */
-int allow_incbin_directive = 0;
+int allow_incbin_directive = 1;
 
 /* Keep the output file.  */
 static int keep_it = 0;
