@@ -1115,6 +1115,12 @@ class General_options
 	      N_("(PowerPC only) Allow a group of stubs to serve multiple "
 		 "output sections"), NULL);
 
+  DEFINE_bool(stub_group_auto_padding, options::TWO_DASHES , '\0', true,
+	      N_("(ARM) For very large binaries, relaxation iterations "
+		 "take long. This option turns on 'smart padding' for stub "
+		 "table, which reduces up to 50% of relaxation time on large "
+		 "objects."), NULL);
+
   DEFINE_bool(no_keep_memory, options::TWO_DASHES, '\0', false,
 	      N_("Use less memory and more disk I/O "
 		 "(included only for compatibility with GNU ld)"), NULL);
