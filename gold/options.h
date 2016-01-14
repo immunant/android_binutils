@@ -644,8 +644,8 @@ class General_options
 	      N_("Allow unresolved references in shared libraries"),
 	      N_("Do not allow unresolved references in shared libraries"));
 
-  DEFINE_bool(apply_dynamic_relocs, options::TWO_DASHES, '\0', true,
-	      N_("Apply link-time values for dynamic relocations (default)"),
+  DEFINE_bool(apply_dynamic_relocs, options::TWO_DASHES, '\0', false,
+	      N_("Apply link-time values for dynamic relocations"),
 	      N_("(aarch64 only) Do not apply link-time values "
 		 "for dynamic relocations"));
 
