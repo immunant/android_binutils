@@ -6,12 +6,6 @@
 	float only when Tag_ABI_VFP_args is 1, using new enum value
 	AEABI_VFP_args_vfp to check that.
 
-2015-07-23  Joseph Myers  <joseph@codesourcery.com>
-
-	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_sections)
-	<DT_MIPS_RLD_MAP_REL>: Add target address to host address
-	difference, not to host pointer.
-
 2015-04-01  Tejas Belagod  <tejas.belagod@arm.com>
 	    Marcus Shawcroft  <marcus.shawcroft@arm.com>
 	    Jiong Wang  <jiong.wang@arm.com>
