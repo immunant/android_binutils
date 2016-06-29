@@ -1,3 +1,12 @@
+2016-06-28 Rahul Chaudhry  <rahulchaudhry@google.com>
+
+	Revert patch -- to be replaced by the upstream patch with tests.
+
+	2015-06-16  Yiran Wang <yiran@google.com>
+
+	    * resolve.cc disable the warning of a hidden symbol matches a
+	    reference to be resolved
+
 2016-02-05  Sriraman Tallam  <tmsriram@google.com>
 
         * icf.cc (get_rel_addend): New function.
