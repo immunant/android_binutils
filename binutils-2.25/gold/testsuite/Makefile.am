@@ -976,6 +976,16 @@ endif FN_PTRS_IN_SO_WITHOUT_PIC
 
 endif TLS
 
+if DEFAULT_TARGET_X86_64
+
+check_PROGRAMS += pr17704a_test
+pr17704a_test.o: pr17704a_test.s
+	$(TEST_AS) --64  -o $@ $<
+pr17704a_test: pr17704a_test.o gcctestdir/ld
+	gcctestdir/ld --icf=all -o $@ $<
+
+endif DEFAULT_TARGET_X86_64
+
 if DEFAULT_TARGET_I386
 
 check_SCRIPTS += i386_mov_to_lea.sh
