@@ -967,7 +967,7 @@ class General_options
 	      N_("Do not page align data, do not make text readonly"),
 	      N_("Page align data, make text readonly"));
 
-  DEFINE_enable(new_dtags, options::EXACTLY_TWO_DASHES, '\0', false,
+  DEFINE_enable(new_dtags, options::EXACTLY_TWO_DASHES, '\0', true,
 		N_("Enable use of DT_RUNPATH"),
 		N_("Disable use of DT_RUNPATH"));
 
