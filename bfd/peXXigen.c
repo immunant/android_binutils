@@ -1141,19 +1141,30 @@ _bfd_XXi_swap_debugdir_out (bfd * abfd, void * inp, void * extp)
   return sizeof (struct external_IMAGE_DEBUG_DIRECTORY);
 }
 
+const char *
+_bfd_XXi_get_codeview_pdb_name (bfd * abfd)
+{
+  char * filename_ptr = bfd_get_filename(abfd);
+  char * last_dir_separator = strrchr(filename_ptr, '/');
+  if (last_dir_separator != NULL) {
+      filename_ptr = last_dir_separator+1;
+  }
+  return filename_ptr;
+}
+
 CODEVIEW_INFO *
 _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length, CODEVIEW_INFO *cvinfo)
 {
-  char buffer[256+1];
+  char buffer [length];
+
+  if (!cvinfo)
+    return NULL;
 
   if (bfd_seek (abfd, where, SEEK_SET) != 0)
     return NULL;
 
-  if (bfd_bread (buffer, 256, abfd) < 4)
+  if (bfd_bread (buffer, length, abfd) < 4)
     return NULL;
-
-  /* Ensure null termination of filename.  */
-  buffer[256] = '\0';
 
   cvinfo->CVSignature = H_GET_32 (abfd, buffer);
   cvinfo->Age = 0;
@@ -1174,7 +1185,7 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
       memcpy (&(cvinfo->Signature[8]), &(cvinfo70->Signature[8]), 8);
 
       cvinfo->SignatureLength = CV_INFO_SIGNATURE_LENGTH;
-      // cvinfo->PdbFileName = cvinfo70->PdbFileName;
+      strcpy(cvinfo->PdbFileName, cvinfo70->PdbFileName);
 
       return cvinfo;
     }
@@ -1196,7 +1207,9 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
 unsigned int
 _bfd_XXi_write_codeview_record (bfd * abfd, file_ptr where, CODEVIEW_INFO *cvinfo)
 {
-  const bfd_size_type size = sizeof (CV_INFO_PDB70) + 1;
+  const char * filename_ptr = _bfd_XXi_get_codeview_pdb_name(abfd);
+  unsigned int filename_size = strlen(filename_ptr);
+  const bfd_size_type size = sizeof (CV_INFO_PDB70) + filename_size + 1;
   bfd_size_type written;
   CV_INFO_PDB70 *cvinfo70;
   char * buffer;
@@ -1216,7 +1229,7 @@ _bfd_XXi_write_codeview_record (bfd * abfd, file_ptr where, CODEVIEW_INFO *cvinf
   memcpy (&(cvinfo70->Signature[8]), &(cvinfo->Signature[8]), 8);
 
   H_PUT_32 (abfd, cvinfo->Age, cvinfo70->Age);
-  cvinfo70->PdbFileName[0] = '\0';
+  strcpy(cvinfo70->PdbFileName, filename_ptr);
 
   written = bfd_bwrite (buffer, size, abfd);
 
@@ -2684,7 +2697,7 @@ pe_print_debugdata (bfd * abfd, void * vfile)
 	  /* PR 17512: file: 065-29434-0.001:0.1
 	     We need to use a 32-bit aligned buffer
 	     to safely read in a codeview record.  */
-          char buffer[256 + 1] ATTRIBUTE_ALIGNED_ALIGNOF (CODEVIEW_INFO);
+          char buffer[idd.SizeOfData] ATTRIBUTE_ALIGNED_ALIGNOF (CODEVIEW_INFO);
 
           CODEVIEW_INFO *cvinfo = (CODEVIEW_INFO *) buffer;
 
@@ -2697,9 +2710,9 @@ pe_print_debugdata (bfd * abfd, void * vfile)
           for (i = 0; i < cvinfo->SignatureLength; i++)
             sprintf (&signature[i*2], "%02x", cvinfo->Signature[i] & 0xff);
 
-          fprintf (file, "(format %c%c%c%c signature %s age %ld)\n",
+          fprintf (file, "(format %c%c%c%c signature %s age %ld pdb %s)\n",
 		   buffer[0], buffer[1], buffer[2], buffer[3],
-		   signature, cvinfo->Age);
+		   signature, cvinfo->Age, cvinfo->PdbFileName);
         }
     }
 
