@@ -1,9 +1,10 @@
 #!/bin/sh
 
-# icf_safe_test.sh -- test --icf=safe
+# icf_safe_pie_test.sh -- test --icf=safe -pie
 
-# Copyright (C) 2009-2016 Free Software Foundation, Inc.
+# Copyright (C) 2009-2017 Free Software Foundation, Inc.
 # Written by Sriraman Tallam <tmsriram@google.com>.
+# Modified by Rahul Chaudhry <rahulchaudhry@google.com>.
 
 # This file is part of gold.
 
@@ -22,10 +23,11 @@
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 # MA 02110-1301, USA.
 
-# The goal of this program is to verify if --icf=safe  works as expected.
-# File icf_safe_test.cc is in this test. This program checks if only
-# ctors and dtors are folded, except for x86 (32 and 64 bit), which
-# uses relocation types to detect if function pointers are taken.
+# The goal of this program is to verify if --icf=safe works with
+# -pie as expected. File icf_safe_test.cc is in this test. This
+# program checks if only ctors and dtors are folded, except for
+# the architectures which use relocation types and instruction
+# opcodes to detect if function pointers are taken.
 
 set -e
 
@@ -67,8 +69,8 @@ arch_specific_safe_fold()
     fi
 }
 
-arch_specific_safe_fold icf_safe_test_1.stdout icf_safe_test_2.stdout \
-  icf_safe_test.map "kept_func_1" "kept_func_2"
-check_fold   icf_safe_test.map "_ZN1AD2Ev" "_ZN1AC2Ev"
-check_nofold icf_safe_test_1.stdout "kept_func_3" "kept_func_1"
-check_nofold icf_safe_test_1.stdout "kept_func_3" "kept_func_2"
+arch_specific_safe_fold icf_safe_pie_test_1.stdout icf_safe_pie_test_2.stdout \
+  icf_safe_pie_test.map "kept_func_1" "kept_func_2"
+check_fold   icf_safe_pie_test.map "_ZN1AD2Ev" "_ZN1AC2Ev"
+check_nofold icf_safe_pie_test_1.stdout "kept_func_3" "kept_func_1"
+check_nofold icf_safe_pie_test_1.stdout "kept_func_3" "kept_func_2"
