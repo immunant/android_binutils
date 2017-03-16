@@ -5812,6 +5812,12 @@ s_incbin (int x ATTRIBUTE_UNUSED)
   long   bytes;
   int    len;
 
+  if (! allow_incbin_directive)
+    {
+      as_fatal (_("\'.incbin\' directive not allowed, use --allow-incbin flag"
+                  " to enable."));
+    }
+
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
 #endif

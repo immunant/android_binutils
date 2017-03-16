@@ -100,6 +100,9 @@ int verbose = 0;
 int flag_use_elf_stt_common = DEFAULT_GENERATE_ELF_STT_COMMON;
 #endif
 
+/* Enable incbin directive. */
+int allow_incbin_directive = 0;
+
 /* Keep the output file.  */
 static int keep_it = 0;
 
@@ -482,7 +485,9 @@ parse_args (int * pargc, char *** pargv)
       OPTION_WARN_FATAL,
       OPTION_COMPRESS_DEBUG,
       OPTION_NOCOMPRESS_DEBUG,
-      OPTION_NO_PAD_SECTIONS /* = STD_BASE + 40 */
+      OPTION_NO_PAD_SECTIONS, /* = STD_BASE + 40 */
+      OPTION_ALLOW_INCBIN,
+      OPTION_NOALLOW_INCBIN
     /* When you add options here, check that they do
        not collide with OPTION_MD_BASE.  See as.h.  */
     };
@@ -502,6 +507,8 @@ parse_args (int * pargc, char *** pargv)
     ,{"al", optional_argument, NULL, OPTION_AL}
     ,{"compress-debug-sections", optional_argument, NULL, OPTION_COMPRESS_DEBUG}
     ,{"nocompress-debug-sections", no_argument, NULL, OPTION_NOCOMPRESS_DEBUG}
+    ,{"allow-incbin", optional_argument, NULL, OPTION_ALLOW_INCBIN}
+    ,{"noallow-incbin", optional_argument, NULL, OPTION_NOALLOW_INCBIN}
     ,{"debug-prefix-map", required_argument, NULL, OPTION_DEBUG_PREFIX_MAP}
     ,{"defsym", required_argument, NULL, OPTION_DEFSYM}
     ,{"dump-config", no_argument, NULL, OPTION_DUMPCONFIG}
@@ -722,6 +729,14 @@ This program has absolutely no warranty.\n"));
 
 	case OPTION_NOCOMPRESS_DEBUG:
 	  flag_compress_debug = COMPRESS_DEBUG_NONE;
+	  break;
+
+	case OPTION_ALLOW_INCBIN:
+	  allow_incbin_directive = 1;
+	  break;
+
+	case OPTION_NOALLOW_INCBIN:
+	  allow_incbin_directive = 0;
 	  break;
 
 	case OPTION_DEBUG_PREFIX_MAP:
