@@ -552,8 +552,11 @@ queue_middle_tasks(const General_options& options,
       plugins->layout_deferred_objects();
     }
 
+  Target *target = NULL;
+
   // TODO(tmsriram): figure out a more principled way to get the target
-  Target* target = const_cast<Target*>(&parameters->target());
+  if (parameters->target_valid())
+    target = const_cast<Target*>(&parameters->target());
 
   // Check if we need to disable PIE because of an unsafe data segment size.
   // Go through each Output section and get the size.  At this point, we do not
@@ -584,16 +587,24 @@ queue_middle_tasks(const General_options& options,
 	      segment_size += os->current_data_size();
 	    }
 	}
-      // Should we inflate the value of segment_size to account for relaxation?
-      // If we miss disabling PIE here, the check in layout.cc will catch it
-      // perfectly and warn.  So, this is fine.
-      if (segment_size >= target->max_pie_data_segment_size())
+      // We are using an estimate for data segment size here as we have not
+      // accounted for the GOT and DYNAMIC sections.  Experiments show that the
+      // estimate is within 1% of the actual size for most binaries.  So, we
+      // will add 1% to the estimated size.
+      // If we miss disabling PIE here because our estimate is wrong, the
+      // check in layout.cc will catch it and warn.
+      uint64_t est_size_of_got_and_dynamic = segment_size / 100;
+      if ((segment_size + est_size_of_got_and_dynamic)
+	  >= target->max_pie_data_segment_size())
 	{
-	  gold_info(_("The data segment size (%ld > %ld) is likely unsafe and"
-		      " PIE has been disabled for this link."),
-		    segment_size, target->max_pie_data_segment_size());
-	  const_cast<General_options*>(&parameters->options())->set_pie_value(false);
+	  gold_info(_("Disabling PIE for this link.  The estimated data segment"
+		      " size (%ld > %ld) would exceed the safe limits for PIE."),
+		    (segment_size + est_size_of_got_and_dynamic),
+		    target->max_pie_data_segment_size());
+	  const_cast<General_options*>
+	    (&parameters->options())->set_pie_value(false);
 	}
+
     }
 
   // Finalize the .eh_frame section.
@@ -639,7 +650,11 @@ queue_middle_tasks(const General_options& options,
   // out.  In order to do this we need to use a default target.
   if (input_objects->number_of_input_objects() == 0
       && layout->incremental_base() == NULL)
-    parameters_force_valid_target();
+    {
+      parameters_force_valid_target();
+      // Re-set the local variable, in case it's still NULL from above.
+      target = const_cast<Target*>(&parameters->target());
+    }
 
   int thread_count = options.thread_count_middle();
   if (thread_count == 0)
