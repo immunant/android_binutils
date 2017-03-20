@@ -454,6 +454,11 @@ class Target_x86_64 : public Sized_target<size, false>
       tls_base_symbol_defined_(false)
   { }
 
+  // The safe value for data segment size for PIE links.
+  uint64_t
+  max_pie_data_segment_size() const
+  { return (128 * 1024 * 1024); }
+
   // Hook for a new output section.
   void
   do_new_output_section(Output_section*) const;

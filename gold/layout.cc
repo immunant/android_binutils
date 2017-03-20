@@ -2776,6 +2776,49 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   while (target->may_relax()
 	 && target->relax(pass, input_objects, symtab, this, task));
 
+  // Check if data segment size is less than the safe value with PIE links.
+  if (parameters->options().pie() && target->max_pie_data_segment_size())
+    {
+      Segment_list::const_iterator p;
+      uint64_t re_vaddr = 0, re_memsz = 0, rw_vaddr = 0, rw_memsz = 0;
+      uint64_t data_seg_size = 0;
+      for (p = this->segment_list_.begin();
+	   p != this->segment_list_.end();
+	   ++p)
+	{
+	  // With -Wl,--rosegment, note the end addr of "R E" segment.
+	  if (parameters->options().rosegment()
+	      && (*p)->type() == elfcpp::PT_LOAD
+	      && ((*p)->flags() & elfcpp::PF_X) != 0
+	      && ((*p)->flags() & elfcpp::PF_R) != 0)
+	    {
+	      re_vaddr = (*p)->vaddr();
+	      re_memsz = (*p)->memsz();
+	      continue;
+	    }
+	  if ((*p)->type() == elfcpp::PT_LOAD
+	      && ((*p)->flags() & elfcpp::PF_W) != 0
+	      && ((*p)->flags() & elfcpp::PF_R) != 0)
+	    {
+	      rw_vaddr = (*p)->vaddr();
+	      rw_memsz = (*p)->memsz();
+	      break;
+	    }
+	}
+
+      // With -Wl,--rosegment, report data segment size as delta of end of
+      // "RW" segment and end of "R E" segment.  Otherwise, data segment
+      // size is just the memsz of "RW" segment.
+      if (parameters->options().rosegment())
+        data_seg_size = (rw_vaddr + rw_memsz) - (re_vaddr + re_memsz);
+      else
+        data_seg_size = rw_memsz;
+
+      if (data_seg_size >= target->max_pie_data_segment_size())
+	gold_warning(_("Unsafe PIE data segment size (%ld > %ld)."),
+		       data_seg_size, target->max_pie_data_segment_size());
+    }
+
   // If there is a load segment that contains the file and program headers,
   // provide a symbol __ehdr_start pointing there.
   // A program can use this to examine itself robustly.

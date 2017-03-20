@@ -72,6 +72,12 @@ class Target
   virtual ~Target()
   { }
 
+  // Returns the safe value for data segment size for PIE links.
+  // A value of 0 means that the size is unlimited.
+  virtual uint64_t
+  max_pie_data_segment_size() const
+  { return 0; }
+
   // Return the bit size that this target implements.  This should
   // return 32 or 64.
   int
