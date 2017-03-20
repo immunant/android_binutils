@@ -552,6 +552,50 @@ queue_middle_tasks(const General_options& options,
       plugins->layout_deferred_objects();
     }
 
+  // TODO(tmsriram): figure out a more principled way to get the target
+  Target* target = const_cast<Target*>(&parameters->target());
+
+  // Check if we need to disable PIE because of an unsafe data segment size.
+  // Go through each Output section and get the size.  At this point, we do not
+  // have the exact size of the data segment but this is a very close estimate.
+  // We are doing this here because disabling PIE later is too late.  Further,
+  // if we miss some cases which are on the edge, it will be caught later in
+  // layout.cc where we check with the exact size of the data segment and warn
+  // if it is breached.
+  if (parameters->options().disable_pie_when_unsafe_data_size()
+      && parameters->options().pie() && target->max_pie_data_segment_size())
+    {
+      uint64_t segment_size = 0;
+      for (Layout::Section_list::const_iterator p = layout->section_list().begin();
+	   p != layout->section_list().end();
+	   ++p)
+	{
+	  Output_section *os = *p;
+	  if (os->is_section_flag_set(elfcpp::SHF_ALLOC)
+	      && os->is_section_flag_set(elfcpp::SHF_WRITE))
+	    {
+	      segment_size += os->current_data_size();
+	    }
+	  // Count read-only sections if --rosegment is set.
+	  else if (parameters->options().rosegment()
+		   && os->is_section_flag_set(elfcpp::SHF_ALLOC)
+		   && !os->is_section_flag_set(elfcpp::SHF_EXECINSTR))
+	    {
+	      segment_size += os->current_data_size();
+	    }
+	}
+      // Should we inflate the value of segment_size to account for relaxation?
+      // If we miss disabling PIE here, the check in layout.cc will catch it
+      // perfectly and warn.  So, this is fine.
+      if (segment_size >= target->max_pie_data_segment_size())
+	{
+	  gold_info(_("The data segment size (%ld > %ld) is likely unsafe and"
+		      " PIE has been disabled for this link."),
+		    segment_size, target->max_pie_data_segment_size());
+	  const_cast<General_options*>(&parameters->options())->set_pie_value(false);
+	}
+    }
+
   // Finalize the .eh_frame section.
   layout->finalize_eh_frame_section();
 
@@ -674,9 +718,6 @@ queue_middle_tasks(const General_options& options,
 
   // Define symbols from any linker scripts.
   layout->define_script_symbols(symtab);
-
-  // TODO(csilvers): figure out a more principled way to get the target
-  Target* target = const_cast<Target*>(&parameters->target());
 
   // Attach sections to segments.
   layout->attach_sections_to_segments(target);

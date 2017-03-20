@@ -995,6 +995,13 @@ class General_options
 	      N_("Force PIC sequences for ARM/Thumb interworking veneers"),
 	      NULL);
 
+  DEFINE_bool(disable_pie_when_unsafe_data_size,
+	      options::TWO_DASHES, '\0', true,
+	      N_("Disable creation of position independent executable"
+		 " when data segment size is larger than the safe value"),
+	      N_("Do not disable creation of position independent executable"
+		 " when data segment size is larger than the safe value"));
+
   DEFINE_bool(pipeline_knowledge, options::ONE_DASH, '\0', false,
 	      NULL, N_("(ARM only) Ignore for backward compatibility"));
 
@@ -1376,6 +1383,13 @@ class General_options
   const char*
   output_file_name() const
   { return this->output(); }
+
+  // This method sets/unsets the value of option -pie.  This is used to
+  // disable -pie when the size of the data segment becomes larger than
+  // a safe value.
+  void
+  set_pie_value(bool value)
+  { this->set_pie(value); }
 
   // This is not defined via a flag, but combines flags to say whether
   // the output is position-independent or not.

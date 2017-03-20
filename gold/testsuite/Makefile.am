@@ -556,6 +556,15 @@ pie_copyrelocs_shared_test.o: pie_copyrelocs_shared_test.cc
 pie_copyrelocs_shared_test.so: pie_copyrelocs_shared_test.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared pie_copyrelocs_shared_test.o
 
+check_SCRIPTS += disable_pie_unsafe_size_test.sh
+check_PROGRAMS += disable_pie_unsafe_size_test
+check_DATA += disable_pie_unsafe_size_test_readelf.stdout
+MOSTLYCLEANFILES += disable_pie_unsafe_size_test
+disable_pie_unsafe_size_test_SOURCES = disable_pie_unsafe_size_test.cc
+disable_pie_unsafe_size_test_LDFLAGS = -Bgcctestdir/ -pie
+disable_pie_unsafe_size_test_readelf.stdout: disable_pie_unsafe_size_test
+	$(TEST_READELF) -l $< >$@ 2>/dev/null
+
 check_PROGRAMS += weak_unresolved_symbols_test
 weak_unresolved_symbols_test_SOURCES = weak_unresolved_symbols_test.cc
 weak_unresolved_symbols_test_CXXFLAGS = -fPIE
