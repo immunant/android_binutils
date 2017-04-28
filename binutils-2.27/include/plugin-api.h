@@ -365,6 +365,24 @@ enum ld_plugin_status
 (*ld_plugin_get_input_section_size) (const struct ld_plugin_section section,
                                      uint64_t *secsize);
 
+typedef
+enum ld_plugin_status
+(*ld_plugin_new_input_handler) (const struct ld_plugin_input_file *file);
+
+/* The linker's interface for registering the "new_input" handler.  */
+
+typedef
+enum ld_plugin_status
+(*ld_plugin_register_new_input) (ld_plugin_new_input_handler handler);
+
+/* The linker's interface for getting an input file handle from an input file
+   added by a plugin.  */
+
+typedef
+enum ld_plugin_status
+(*ld_plugin_get_input_handle) (const char *pathname,
+                               void **handle);
+
 enum ld_plugin_level
 {
   LDPL_INFO,
@@ -407,7 +425,8 @@ enum ld_plugin_tag
   LDPT_UNIQUE_SEGMENT_FOR_SECTIONS = 27,
   LDPT_GET_SYMBOLS_V3 = 28,
   LDPT_GET_INPUT_SECTION_ALIGNMENT = 29,
-  LDPT_GET_INPUT_SECTION_SIZE = 30
+  LDPT_GET_INPUT_SECTION_SIZE = 30,
+  LDPT_REGISTER_NEW_INPUT_HOOK = 31
 };
 
 /* The plugin transfer vector.  */
@@ -441,6 +460,7 @@ struct ld_plugin_tv
     ld_plugin_unique_segment_for_sections tv_unique_segment_for_sections;
     ld_plugin_get_input_section_alignment tv_get_input_section_alignment;
     ld_plugin_get_input_section_size tv_get_input_section_size;
+    ld_plugin_register_new_input tv_register_new_input;
   } tv_u;
 };
 
