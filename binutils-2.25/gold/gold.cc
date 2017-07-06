@@ -851,6 +851,10 @@ queue_final_tasks(const General_options& options,
 
   bool any_postprocessing_sections = layout->any_postprocessing_sections();
 
+  bool need_relocstub_tasks = !parameters->options().relocatable() &&
+      (parameters->options().fix_cortex_a53_843419()
+       || parameters->options().fix_cortex_a53_835769());
+
   // Use a blocker to wait until all the input sections have been
   // written out.
   Task_token* input_sections_blocker = NULL;
@@ -860,6 +864,9 @@ queue_final_tasks(const General_options& options,
       // Write_symbols_task, Relocate_tasks.
       input_sections_blocker->add_blocker();
       input_sections_blocker->add_blockers(input_objects->number_of_relobjs());
+      // Blockers for n Relocstub_tasks.
+      if (need_relocstub_tasks)
+        input_sections_blocker->add_blockers(input_objects->number_of_relobjs());
     }
 
   // Use a blocker to block any objects which have to wait for the
@@ -873,6 +880,9 @@ queue_final_tasks(const General_options& options,
   // Relocate_tasks.
   final_blocker->add_blockers(3);
   final_blocker->add_blockers(input_objects->number_of_relobjs());
+  // Blockers for n Relocstub_tasks.
+  if (need_relocstub_tasks)
+    final_blocker->add_blockers(input_objects->number_of_relobjs());
   if (!any_postprocessing_sections)
     final_blocker->add_blocker();
 
@@ -901,7 +911,17 @@ queue_final_tasks(const General_options& options,
     workqueue->queue(new Relocate_task(symtab, layout, *p, of,
 				       input_sections_blocker,
 				       output_sections_blocker,
-				       final_blocker));
+				       final_blocker,
+                                       need_relocstub_tasks));
+
+  // Queue a task for each input object to relocate stub tables.
+  if (need_relocstub_tasks)
+    for (Input_objects::Relobj_iterator p = input_objects->relobj_begin();
+         p != input_objects->relobj_end(); ++p)
+      workqueue->queue(new Relocstub_task(symtab, layout, *p, of,
+                                          input_sections_blocker,
+                                          output_sections_blocker,
+                                          final_blocker));
 
   // Queue a task to write out the output sections which depend on
   // input sections.  If there are any sections which require
