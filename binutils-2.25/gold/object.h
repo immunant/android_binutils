@@ -1274,8 +1274,7 @@ class Relobj : public Object
   { return this->do_is_big_endian(); }
 
   virtual void
-  clear_views()
-  {}
+  clear_views() = 0;
 
  protected:
   // The output section to be used for each input section, indexed by
@@ -1358,8 +1357,7 @@ class Relobj : public Object
   do_relocate(const Symbol_table* symtab, const Layout*, Output_file* of) = 0;
 
   virtual void
-  do_relocate_stub_tables(const Symbol_table*, const Layout*)
-  {}
+  do_relocate_stub_tables(const Symbol_table*, const Layout*) = 0;
 
   // Set the offset of a section--implemented by child class.
   virtual void
@@ -1957,6 +1955,9 @@ class Sized_relobj : public Relobj
   section_offsets()
   { return this->section_offsets_; }
 
+  virtual void
+  do_relocate_stub_tables(const Symbol_table*, const Layout*);
+
   // Get the address of an output section.
   uint64_t
   do_output_section_address(unsigned int shndx);
@@ -2224,13 +2225,8 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   { return this->is_deferred_layout_; }
 
   // Discard output_views_ created in create_views().
-  void
-  clear_views()
-  {
-    gold_assert(this->output_views_);
-    delete this->output_views_;
-    this->output_views_ = NULL;
-  }
+  virtual void
+  clear_views();
 
  protected:
   typedef typename Sized_relobj<size, big_endian>::Output_sections
@@ -2337,10 +2333,6 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   // Relocate the input sections and write out the local symbols.
   void
   do_relocate(const Symbol_table* symtab, const Layout*, Output_file* of);
-
-  virtual void
-  do_relocate_stub_tables(const Symbol_table*, const Layout*)
-  {}
 
   // Get the size of a section.
   uint64_t
