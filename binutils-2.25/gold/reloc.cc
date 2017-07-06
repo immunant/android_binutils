@@ -238,11 +238,15 @@ Relocate_task::run(Workqueue*)
 {
   this->object_->relocate(this->symtab_, this->layout_, this->of_);
 
-  // This is normally the last thing we will do with an object, so
-  // uncache all views.
-  this->object_->clear_view_cache_marks();
-
-  this->object_->release();
+  // When defer_object_cleanup_ is true, we do cleanup work at the end of
+  // Relocstub_task.
+  if (!this->defer_object_cleanup_) {
+    // This is normally the last thing we will do with an object, so
+    // uncache all views.
+    this->object_->clear_views();
+    this->object_->clear_view_cache_marks();
+    this->object_->release();
+  }
 }
 
 // Return a debugging name for the task.
@@ -251,6 +255,25 @@ std::string
 Relocate_task::get_name() const
 {
   return "Relocate_task " + this->object_->name();
+}
+
+std::string
+Relocstub_task::get_name() const
+{
+  return "Relocstub_task " + this->object_->name();
+}
+
+void
+Relocstub_task::run(Workqueue*)
+{
+  this->object_->relocate_stub_tables(this->symtab_, this->layout_);
+
+  // This is normally the last thing we will do with an object, so
+  // uncache all views.
+  this->object_->clear_views();
+  this->object_->clear_view_cache_marks();
+  this->object_->release();
+
 }
 
 // Read the relocs and local symbols from the object file and store
@@ -652,7 +675,9 @@ Sized_relobj_file<size, big_endian>::do_relocate(const Symbol_table* symtab,
 					       shnum * This::shdr_size,
 					       true, true);
 
-  Views views;
+  // "Views" created here is either discarded at the end of "Relocate_task" or
+  // "Relocstub_task", depending whether the latter ones are needed.
+  Views& views = *(this->create_views());
   views.resize(shnum);
 
   // Make two passes over the sections.  The first one copies the
@@ -1696,6 +1721,15 @@ void
 Sized_relobj_file<32, false>::do_relocate(const Symbol_table* symtab,
 					  const Layout* layout,
 					  Output_file* of);
+
+template
+void
+Sized_relobj_file<32, false>::do_relocate_stub_tables(const Symbol_table* symtab,
+                                                      const Layout* layout);
+
+template
+void
+Sized_relobj_file<32, false>::clear_views();
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
@@ -1704,6 +1738,15 @@ void
 Sized_relobj_file<32, true>::do_relocate(const Symbol_table* symtab,
 					 const Layout* layout,
 					 Output_file* of);
+
+template
+void
+Sized_relobj_file<32, true>::do_relocate_stub_tables(const Symbol_table* symtab,
+                                                     const Layout* layout);
+
+template
+void
+Sized_relobj_file<32, true>::clear_views();
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
@@ -1712,6 +1755,15 @@ void
 Sized_relobj_file<64, false>::do_relocate(const Symbol_table* symtab,
 					  const Layout* layout,
 					  Output_file* of);
+
+template
+void
+Sized_relobj_file<64, false>::do_relocate_stub_tables(const Symbol_table* symtab,
+                                                      const Layout* layout);
+
+template
+void
+Sized_relobj_file<64, false>::clear_views();
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
@@ -1720,6 +1772,15 @@ void
 Sized_relobj_file<64, true>::do_relocate(const Symbol_table* symtab,
 					 const Layout* layout,
 					 Output_file* of);
+
+template
+void
+Sized_relobj_file<64, true>::do_relocate_stub_tables(const Symbol_table* symtab,
+                                                     const Layout* layout);
+
+template
+void
+Sized_relobj_file<64, true>::clear_views();
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE
