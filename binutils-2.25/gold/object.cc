@@ -616,6 +616,16 @@ Sized_relobj_file<size, big_endian>::find_eh_frame(
     }
 }
 
+
+template<int size, bool big_endian>
+void
+Sized_relobj_file<size, big_endian>::clear_views()
+{
+  gold_assert(this->output_views_);
+  delete this->output_views_;
+  this->output_views_ = NULL;
+}
+
 // Return TRUE if this is a section whose contents will be needed in the
 // Add_symbols task.  This function is only called for sections that have
 // already passed the test in is_compressed_debug_section(), so we know
