@@ -724,6 +724,11 @@ Sized_relobj_file<size, big_endian>::do_relocate(const Symbol_table* symtab,
 			    layout->symtab_section_offset());
 }
 
+template<int size, bool big_endian>
+void
+Sized_relobj<size, big_endian>::do_relocate_stub_tables(const Symbol_table*, const Layout*)
+{}
+
 // Sort a Read_multiple vector by file offset.
 struct Read_multiple_compare
 {
@@ -1724,12 +1729,9 @@ Sized_relobj_file<32, false>::do_relocate(const Symbol_table* symtab,
 
 template
 void
-Sized_relobj_file<32, false>::do_relocate_stub_tables(const Symbol_table* symtab,
-                                                      const Layout* layout);
+Sized_relobj<32, false>::do_relocate_stub_tables(const Symbol_table* symtab,
+                                                 const Layout* layout);
 
-template
-void
-Sized_relobj_file<32, false>::clear_views();
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
@@ -1741,12 +1743,8 @@ Sized_relobj_file<32, true>::do_relocate(const Symbol_table* symtab,
 
 template
 void
-Sized_relobj_file<32, true>::do_relocate_stub_tables(const Symbol_table* symtab,
-                                                     const Layout* layout);
-
-template
-void
-Sized_relobj_file<32, true>::clear_views();
+Sized_relobj<32, true>::do_relocate_stub_tables(const Symbol_table* symtab,
+                                                const Layout* layout);
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
@@ -1758,12 +1756,8 @@ Sized_relobj_file<64, false>::do_relocate(const Symbol_table* symtab,
 
 template
 void
-Sized_relobj_file<64, false>::do_relocate_stub_tables(const Symbol_table* symtab,
-                                                      const Layout* layout);
-
-template
-void
-Sized_relobj_file<64, false>::clear_views();
+Sized_relobj<64, false>::do_relocate_stub_tables(const Symbol_table* symtab,
+                                                 const Layout* layout);
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
@@ -1775,12 +1769,8 @@ Sized_relobj_file<64, true>::do_relocate(const Symbol_table* symtab,
 
 template
 void
-Sized_relobj_file<64, true>::do_relocate_stub_tables(const Symbol_table* symtab,
-                                                     const Layout* layout);
-
-template
-void
-Sized_relobj_file<64, true>::clear_views();
+Sized_relobj<64, true>::do_relocate_stub_tables(const Symbol_table* symtab,
+                                                const Layout* layout);
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE

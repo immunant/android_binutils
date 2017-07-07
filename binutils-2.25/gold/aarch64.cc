@@ -8281,4 +8281,33 @@ Target_selector_aarch64<32, false> target_selector_aarch64elf32;
 Target_selector_aarch64<64, true> target_selector_aarch64elfb;
 Target_selector_aarch64<64, false> target_selector_aarch64elf;
 
+#ifdef HAVE_TARGET_32_LITTLE
+template
+void
+AArch64_relobj<32, false>::do_relocate_stub_tables(const Symbol_table* symtab,
+                                                   const Layout* layout);
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+void
+AArch64_relobj<32, true>::do_relocate_stub_tables(const Symbol_table* symtab,
+                                                  const Layout* layout);
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+void
+AArch64_relobj<64, false>::do_relocate_stub_tables(const Symbol_table* symtab,
+                                                   const Layout* layout);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+void
+AArch64_relobj<64, true>::do_relocate_stub_tables(const Symbol_table* symtab,
+                                                  const Layout* layout);
+#endif
+
+
 } // End anonymous namespace.
