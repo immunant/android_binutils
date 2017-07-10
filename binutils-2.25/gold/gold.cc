@@ -851,9 +851,7 @@ queue_final_tasks(const General_options& options,
 
   bool any_postprocessing_sections = layout->any_postprocessing_sections();
 
-  bool need_relocstub_tasks = !parameters->options().relocatable() &&
-      (parameters->options().fix_cortex_a53_843419()
-       || parameters->options().fix_cortex_a53_835769());
+  bool need_relocstub_tasks = true;
 
   // Use a blocker to wait until all the input sections have been
   // written out.
