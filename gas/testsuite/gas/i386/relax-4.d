@@ -1,4 +1,5 @@
 #source: relax-3.s
+#as: -mno-shared
 #objdump: -dwr
 
 .*: +file format .*

@@ -531,7 +531,7 @@ static int use_big_obj = 0;
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 /* 1 if generating code for a shared library.  */
-static int shared = 0;
+static int shared = 1;
 #endif
 
 /* 1 for intel syntax,
@@ -9830,6 +9830,7 @@ const char *md_shortopts = "qn";
 #define OPTION_MINTEL64 (OPTION_MD_BASE + 23)
 #define OPTION_MFENCE_AS_LOCK_ADD (OPTION_MD_BASE + 24)
 #define OPTION_MRELAX_RELOCATIONS (OPTION_MD_BASE + 25)
+#define OPTION_MNO_SHARED (OPTION_MD_BASE + 26)
 
 struct option md_longopts[] =
 {
@@ -9841,6 +9842,7 @@ struct option md_longopts[] =
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   {"x32", no_argument, NULL, OPTION_X32},
   {"mshared", no_argument, NULL, OPTION_MSHARED},
+  {"mno-shared", no_argument, NULL, OPTION_MNO_SHARED},
 #endif
   {"divide", no_argument, NULL, OPTION_DIVIDE},
   {"march", required_argument, NULL, OPTION_MARCH},
@@ -9908,6 +9910,10 @@ md_parse_option (int c, const char *arg)
 
     case OPTION_MSHARED:
       shared = 1;
+      break;
+
+    case OPTION_MNO_SHARED:
+      shared = 0;
       break;
 #endif
 #if (defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) \
@@ -10421,6 +10427,8 @@ md_show_usage (FILE *stream)
   -madd-bnd-prefix        add BND prefix for all valid branches\n"));
   fprintf (stream, _("\
   -mshared                disable branch optimization for shared code\n"));
+  fprintf (stream, _("\
+  -mno-shared             enable branch optimization\n"));
 # if defined (TE_PE) || defined (TE_PEP)
   fprintf (stream, _("\
   -mbig-obj               generate big object files\n"));
