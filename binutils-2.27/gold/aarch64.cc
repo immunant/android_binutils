@@ -6158,6 +6158,14 @@ Target_aarch64<size, big_endian>::Scan::local(
     case elfcpp::R_AARCH64_PREL16:
       break;
 
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G0:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G0_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G1:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G1_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G2:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G2_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G3:
+    case elfcpp::R_AARCH64_LD64_GOTOFF_LO15:
     case elfcpp::R_AARCH64_ADR_GOT_PAGE:
     case elfcpp::R_AARCH64_LD64_GOT_LO12_NC:
     case elfcpp::R_AARCH64_LD64_GOTPAGE_LO15:
@@ -6515,6 +6523,14 @@ Target_aarch64<size, big_endian>::Scan::global(
 	break;
       }
 
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G0:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G0_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G1:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G1_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G2:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G2_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G3:
+    case elfcpp::R_AARCH64_LD64_GOTOFF_LO15:
     case elfcpp::R_AARCH64_ADR_GOT_PAGE:
     case elfcpp::R_AARCH64_LD64_GOT_LO12_NC:
     case elfcpp::R_AARCH64_LD64_GOTPAGE_LO15:
@@ -7232,6 +7248,36 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
       reloc_status = Reloc::template pcrela_general<32>(
 	view, object, psymval, addend, address, reloc_property);
       break;
+
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G0:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G1:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G2:
+      gold_assert(have_got_offset);
+      value = got_offset + addend;
+      reloc_status = Reloc::movnz(view, value, reloc_property);
+      break;
+
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G0_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G1_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G2_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G3:
+      gold_assert(have_got_offset);
+      value = got_offset + addend;
+      reloc_status = Reloc::template rela_general<32>(
+          view, value, addend, reloc_property);
+      break;
+
+    case elfcpp::R_AARCH64_LD64_GOTOFF_LO15:
+      {
+	gold_assert(have_got_offset);
+	value = got_offset + addend;
+	if ((value & 7) != 0)
+	  reloc_status = Reloc::STATUS_OVERFLOW;
+	else
+	  reloc_status = Reloc::template rela_general<32>(
+            view, value, addend, reloc_property);
+	break;
+      }
 
     case elfcpp::R_AARCH64_ADR_GOT_PAGE:
       gold_assert(have_got_offset);

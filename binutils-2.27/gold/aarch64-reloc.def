@@ -55,6 +55,15 @@ ARD(LDST64_ABS_LO12_NC           , STATIC ,  AARCH64    ,   Y,  -1,    0,RL_CHEC
 ARD(LDST128_ABS_LO12_NC          , STATIC ,  AARCH64    ,   Y,  -1,    0,RL_CHECK_ALIGN16 ,    4,11 , Symbol::ABSOLUTE_REF ,                         LDST  )
 // Above 10 relocs are from Table 4-9, Relocations to generate 19, 21 and 33 bit PC-relative addresses.
 
+
+ARD(MOVW_GOTOFF_G0               , STATIC ,  AARCH64    ,   Y,  -1,   16,16               ,    0,15 , Symbol::RELATIVE_REF ,                         MOVW  )
+ARD(MOVW_GOTOFF_G0_NC            , STATIC ,  AARCH64    ,   Y,  -1,    0,0                ,    0,15 , Symbol::RELATIVE_REF ,                         MOVW  )
+ARD(MOVW_GOTOFF_G1               , STATIC ,  AARCH64    ,   Y,  -1,   32,32               ,   16,31 , Symbol::RELATIVE_REF ,                         MOVW  )
+ARD(MOVW_GOTOFF_G1_NC            , STATIC ,  AARCH64    ,   Y,  -1,    0,0                ,   16,31 , Symbol::RELATIVE_REF ,                         MOVW  )
+ARD(MOVW_GOTOFF_G2               , STATIC ,  AARCH64    ,   Y,  -1,   48,48               ,   32,47 , Symbol::RELATIVE_REF ,                         MOVW  )
+ARD(MOVW_GOTOFF_G2_NC            , STATIC ,  AARCH64    ,   Y,  -1,    0,0                ,   32,47 , Symbol::RELATIVE_REF ,                         MOVW  )
+ARD(MOVW_GOTOFF_G3               , STATIC ,  AARCH64    ,   Y,  -1,    0,0                ,   48,63 , Symbol::RELATIVE_REF ,                         MOVW  )
+ARD(LD64_GOTOFF_LO15             , STATIC ,  AARCH64    ,   Y,  -1,    0,15               ,    3,14 , Symbol::RELATIVE_REF ,                         LDST  )
 ARD(ADR_GOT_PAGE                 , STATIC ,  AARCH64    ,   Y,  -1,   32,32               ,   12,32 , Symbol::RELATIVE_REF ,                         ADRP  )
 ARD(LD64_GOT_LO12_NC             , STATIC ,  AARCH64    ,   Y,  -1,    0,RL_CHECK_ALIGN8  ,    3,11 , Symbol::ABSOLUTE_REF ,                         LDST  )
 ARD(LD64_GOTPAGE_LO15            , STATIC ,  AARCH64    ,   Y,  -1,    0,15               ,    3,14 , Symbol::RELATIVE_REF ,                         LDST  )
