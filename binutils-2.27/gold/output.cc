@@ -4432,7 +4432,7 @@ Output_segment::set_section_addresses(const Target* target,
   uint64_t ret;
   for (int i = 0; i < static_cast<int>(ORDER_MAX); ++i)
     {
-      if (i == static_cast<int>(ORDER_RELRO_LAST))
+      if (*has_relro && i == static_cast<int>(ORDER_RELRO_LAST))
 	{
 	  *poff += last_relro_pad;
 	  addr += last_relro_pad;

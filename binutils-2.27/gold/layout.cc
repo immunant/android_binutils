@@ -3707,10 +3707,9 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 		  off = orig_off + ((addr - orig_addr) & (abi_pagesize - 1));
 		  off = align_file_offset(off, addr, abi_pagesize);
 
-		  increase_relro = this->increase_relro_;
-		  if (this->script_options_->saw_sections_clause())
-		    increase_relro = 0;
-		  has_relro = false;
+                  // Since we didn't have relro the last time we laid out this
+                  // section, we won't have relro now either. Thus, we don't
+                  // need to reset increase_relro and has_relro.
 
 		  new_addr = (*p)->set_section_addresses(target, this,
 							 true, addr,
