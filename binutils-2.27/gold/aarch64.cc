@@ -6977,7 +6977,7 @@ Target_aarch64<size, big_endian>::do_finalize_sections(
   Symbol* sym = this->global_offset_table_;
   if (sym != NULL)
     {
-      uint64_t data_size = this->got_plt_->current_data_size();
+      uint64_t data_size = this->got_->current_data_size();
       symtab->get_sized_symbol<size>(sym)->set_symsize(data_size);
 
       // If the .got section is more than 0x8000 bytes, we add
