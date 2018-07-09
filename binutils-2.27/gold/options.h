@@ -1377,6 +1377,9 @@ class General_options
   DEFINE_bool_alias(textoff, text, options::DASH_Z, '\0',
 		    N_("Permit relocations in read-only segments (default)"),
 		    NULL, true);
+  DEFINE_bool(unipot, options::DASH_Z, '\0', false,
+	      N_("Mark DSO as compatible with unified pagerando POT"),
+	      NULL);
 
  public:
   typedef options::Dir_list Dir_list;
