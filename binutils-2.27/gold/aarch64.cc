@@ -3466,7 +3466,8 @@ class Target_aarch64 : public Sized_target<size, big_endian>
     GOT_TYPE_STANDARD = 0,      // GOT entry for a regular symbol
     GOT_TYPE_TLS_OFFSET = 1,    // GOT entry for TLS offset
     GOT_TYPE_TLS_PAIR = 2,      // GOT entry for TLS module/offset pair
-    GOT_TYPE_TLS_DESC = 3       // GOT entry for TLS_DESC pair
+    GOT_TYPE_TLS_DESC = 3,      // GOT entry for TLS_DESC pair
+    GOT_TYPE_PAGERANDO = 4,     // GOT entry for pagerando reference
   };
 
   // This type is used as the argument to the target specific
@@ -6523,6 +6524,13 @@ Target_aarch64<size, big_endian>::Scan::global(
 	break;
       }
 
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G0_PRC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G0_PRC_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G1_PRC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G1_PRC_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G2_PRC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G2_PRC_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G3_PRC:
     case elfcpp::R_AARCH64_MOVW_GOTOFF_G0:
     case elfcpp::R_AARCH64_MOVW_GOTOFF_G0_NC:
     case elfcpp::R_AARCH64_MOVW_GOTOFF_G1:
@@ -6570,8 +6578,12 @@ Target_aarch64<size, big_endian>::Scan::global(
 		    && parameters->options().shared())
 		|| (gsym->type() == elfcpp::STT_GNU_IFUNC
 		    && parameters->options().output_is_position_independent()))
-	      got->add_global_with_rel(gsym, GOT_TYPE_STANDARD,
-				       rela_dyn, elfcpp::R_AARCH64_GLOB_DAT);
+              if (r_type & 0xe000) // _PRC variants of MOVW_GOTOFF
+                got->add_global_with_rel(gsym, GOT_TYPE_PAGERANDO,
+                                           rela_dyn, 0xE000);
+              else
+                got->add_global_with_rel(gsym, GOT_TYPE_STANDARD,
+                                         rela_dyn, elfcpp::R_AARCH64_GLOB_DAT);
 	    else
 	      {
 		// For a STT_GNU_IFUNC symbol we want to write the PLT
@@ -7099,8 +7111,19 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
 		  ? (target->got_->current_data_size() >= 0x8000
 		     ? 0x8000 : 0)
 		  : 0);
+  bool is_pagerando = false;
   switch (r_type)
     {
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G0_PRC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G0_PRC_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G1_PRC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G1_PRC_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G2_PRC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G2_PRC_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G3_PRC:
+      is_pagerando = true;
+      // Fallthrough
+
     case elfcpp::R_AARCH64_MOVW_GOTOFF_G0:
     case elfcpp::R_AARCH64_MOVW_GOTOFF_G0_NC:
     case elfcpp::R_AARCH64_MOVW_GOTOFF_G1:
@@ -7117,8 +7140,15 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
     case elfcpp::R_AARCH64_LD64_GOTPAGE_LO15:
       if (gsym != NULL)
 	{
-	  gold_assert(gsym->has_got_offset(GOT_TYPE_STANDARD));
-	  got_offset = gsym->got_offset(GOT_TYPE_STANDARD) - got_base;
+          if (is_pagerando && gsym->has_got_offset(GOT_TYPE_PAGERANDO))
+            {
+              got_offset = gsym->got_offset(GOT_TYPE_PAGERANDO) - got_base;
+            }
+          else
+            {
+              gold_assert(gsym->has_got_offset(GOT_TYPE_STANDARD));
+              got_offset = gsym->got_offset(GOT_TYPE_STANDARD) - got_base;
+            }
 	}
       else
 	{
@@ -7252,6 +7282,9 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
     case elfcpp::R_AARCH64_MOVW_GOTOFF_G0:
     case elfcpp::R_AARCH64_MOVW_GOTOFF_G1:
     case elfcpp::R_AARCH64_MOVW_GOTOFF_G2:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G0_PRC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G1_PRC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G2_PRC:
       gold_assert(have_got_offset);
       value = got_offset + addend;
       reloc_status = Reloc::movnz(view, value, reloc_property);
@@ -7261,6 +7294,10 @@ Target_aarch64<size, big_endian>::Relocate::relocate(
     case elfcpp::R_AARCH64_MOVW_GOTOFF_G1_NC:
     case elfcpp::R_AARCH64_MOVW_GOTOFF_G2_NC:
     case elfcpp::R_AARCH64_MOVW_GOTOFF_G3:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G0_PRC_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G1_PRC_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G2_PRC_NC:
+    case elfcpp::R_AARCH64_MOVW_GOTOFF_G3_PRC:
       gold_assert(have_got_offset);
       value = got_offset + addend;
       reloc_status = Reloc::template rela_general<32>(

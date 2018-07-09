@@ -115,3 +115,11 @@ ARD(TLSDESC_CALL                 , STATIC ,  CFLOW     ,    Y,  -1,    0,0      
 // A - Checking X, (L,U), if L == 0 && U == 0, no check. Otherwise, L!=0,
 //     check that -2^L<=X<2^U. Also an extra alignment check could be embeded
 //     into U.
+
+ARD(MOVW_GOTOFF_G0_PRC           , STATIC ,  AARCH64    ,   Y,  -1,   16,16               ,    0,15 , Symbol::RELATIVE_REF ,                         MOVW  )
+ARD(MOVW_GOTOFF_G0_PRC_NC        , STATIC ,  AARCH64    ,   Y,  -1,    0,0                ,    0,15 , Symbol::RELATIVE_REF ,                         MOVW  )
+ARD(MOVW_GOTOFF_G1_PRC           , STATIC ,  AARCH64    ,   Y,  -1,   32,32               ,   16,31 , Symbol::RELATIVE_REF ,                         MOVW  )
+ARD(MOVW_GOTOFF_G1_PRC_NC        , STATIC ,  AARCH64    ,   Y,  -1,    0,0                ,   16,31 , Symbol::RELATIVE_REF ,                         MOVW  )
+ARD(MOVW_GOTOFF_G2_PRC           , STATIC ,  AARCH64    ,   Y,  -1,   48,48               ,   32,47 , Symbol::RELATIVE_REF ,                         MOVW  )
+ARD(MOVW_GOTOFF_G2_PRC_NC        , STATIC ,  AARCH64    ,   Y,  -1,    0,0                ,   32,47 , Symbol::RELATIVE_REF ,                         MOVW  )
+ARD(MOVW_GOTOFF_G3_PRC           , STATIC ,  AARCH64    ,   Y,  -1,    0,0                ,   48,63 , Symbol::RELATIVE_REF ,                         MOVW  )

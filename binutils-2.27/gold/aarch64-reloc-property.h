@@ -216,6 +216,7 @@ class AArch64_reloc_property_table
   // Map aarch64 rtypes into range(0,300) as following
   //   256 ~ 313 -> 0 ~ 57
   //   512 ~ 573 -> 128 ~ 189
+  //   0xe12c ~ 0xe132 -> 190 ~ 197
   int
   code_to_array_index(unsigned int code) const
   {
@@ -223,13 +224,17 @@ class AArch64_reloc_property_table
     if (!((code >= elfcpp::R_AARCH64_ABS64 &&
 	   code <= elfcpp::R_AARCH64_LD64_GOTPAGE_LO15)
 	  || (code >= elfcpp::R_AARCH64_TLSGD_ADR_PREL21 &&
-	      code <= elfcpp::R_AARCH64_TLSLD_LDST128_DTPREL_LO12_NC)))
+	      code <= elfcpp::R_AARCH64_TLSLD_LDST128_DTPREL_LO12_NC)
+	  || (code >= elfcpp::R_AARCH64_MOVW_GOTOFF_G0_PRC &&
+	      code <= elfcpp::R_AARCH64_MOVW_GOTOFF_G3_PRC)))
       {
 	gold_error(_("Invalid/unrecognized reloc reloc %d."), code);
       }
     unsigned int rv = -1;
     if (code & (1 << 9))
       rv = 128 + code - 512;  // 512 - 573
+    else if (code & 0xe000)
+      rv = 190 + code - 0xe12c;  // 0xe12c - 0xe132
     else if (code & (1 << 8))
       rv = code - 256;  // 256 - 313
     gold_assert(rv <= Property_table_size);
